@@ -1,4 +1,4 @@
-# universal makefile cli wrapper – prd v0.2
+# mkcli – universal makefile cli wrapper – prd v0.2
 
 > purpose: one wrapper → many makefiles → zero cd gymnastics.
 
@@ -76,7 +76,7 @@ flags: `--yes` (non-interactive), `--version`, `--registry <path>` override.
 ---
 
 ```bash
-register() {                         # CLI init
+register() {                         # mkcli init
   alias="$1"; dir="$(realpath "$2")"
   [ -f "$dir/Makefile" ] || abort "no Makefile"
   confirm_symlink_write "$alias"    # ask unless --yes
@@ -95,7 +95,7 @@ dispatch_alias() {                  # executed when called as <alias>
   esac
 }
 
-remove() {                          # CLI remove
+remove() {                          # mkcli remove
   alias="$1"
   entry="$(lookup_registry "$alias")" || abort "not registered"
   link="/usr/local/bin/$alias"
