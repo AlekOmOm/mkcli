@@ -4,8 +4,12 @@ VERSION="0.1.0"
 REG_USER="${MKCLI_REGISTRY:-$HOME/.config/mkcli/registry}"
 LINK_DIR="${MKCLI_LINK_DIR:-/usr/local/bin}"
 mkdir -p "$(dirname "$REG_USER")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "$SCRIPT_DIR/lib/registry.sh"
+. "$SCRIPT_DIR/lib/link.sh"
+. "$SCRIPT_DIR/lib/parse.sh"
 lookup_dir() {
-    grep -E "^$1 " "$REG_USER" 2>/dev/null | cut -d' ' -f2 || true
+    registry_lookup "$1"
 }
 alias_dispatch() {
     alias_name="$(basename "$0")"
@@ -15,9 +19,8 @@ alias_dispatch() {
         exit 1
     fi
     case "${1-}" in
-    "" | "--help")
-        make -C "$dir" -pRrq -f "$dir/Makefile" : 2>/dev/null |
-            awk -F':' '/^[a-zA-Z0-9][^$#\/\t=]*:/ {print $1}' | sort -u
+    "" | "help" | "--help" | "--list-targets")
+        parse_list_targets "$dir"
         exit 0
         ;;
     esac
@@ -34,19 +37,51 @@ cmd_init() {
         echo "Makefile not found in $abs_path"
         exit 1
     }
-    tmp="$(mktemp)"
-    grep -v -E "^$alias_name " "$REG_USER" 2>/dev/null >"$tmp" || true
-    echo "$alias_name $abs_path $VERSION" >>"$tmp"
-    mv "$tmp" "$REG_USER"
+    if registry_lookup "$alias_name" >/dev/null; then
+        printf 'Alias %s already exists, override? [y/N]: ' "$alias_name"
+        read -r reply
+        [ "$reply" = "y" ] || exit 1
+    fi
+    registry_write "$alias_name" "$abs_path" "$VERSION"
     echo "> adding to PATH"
-    sudo ln -sf "$(realpath "$0")" "$LINK_DIR/$alias_name"
+    link_create "$alias_name" "$(realpath "$0")"
     echo "$alias_name registered $abs_path"
 }
 cmd_list() {
-    [ -f "$REG_USER" ] && cat "$REG_USER"
+    registry_list | awk '{printf "%-10s %-40s %s\n", $1, $2, $3}'
+}
+cmd_remove() {
+    [ $# -eq 1 ] || {
+        echo "usage: mkcli remove <alias>"
+        exit 1
+    }
+    alias_name="$1"
+    if ! registry_lookup "$alias_name" >/dev/null; then
+        echo "alias not found"
+        exit 0
+    fi
+    dst="$LINK_DIR/$alias_name"
+    if [ -e "$dst" ]; then
+        if [ -L "$dst" ]; then
+            target="$(readlink "$dst")"
+            if [ "$target" != "$(realpath "$0")" ]; then
+                echo "$dst points elsewhere" >&2
+                exit 1
+            fi
+        else
+            echo "$dst is not a symlink" >&2
+            exit 1
+        fi
+    fi
+    printf 'Remove %s? [y/N]: ' "$alias_name"
+    read -r reply
+    [ "$reply" = "y" ] || exit 1
+    link_remove "$alias_name" "$(realpath "$0")"
+    registry_delete "$alias_name"
+    echo "$alias_name removed"
 }
 show_help() {
-    printf '%s\n' "mkcli $VERSION" "commands:" "  init <alias> <path>" "  list" "options:" "  --help" "aliases:" "  <alias> --help (list targets)" "  <alias> <target> [args]"
+    printf '%s\n' "mkcli $VERSION" "commands:" "  init <alias> <path>" "  list" "  remove <alias>" "options:" "  --help" "aliases:" "  <alias> --help (list targets)" "  <alias> <target> [args]"
 }
 main() {
     if [ "$(basename "$0")" != "mkcli" ]; then
@@ -59,6 +94,10 @@ main() {
         cmd_init "$@"
         ;;
     list) cmd_list ;;
+    remove)
+        shift
+        cmd_remove "$@"
+        ;;
     -h | --help | help) show_help ;;
     "") show_help ;;
     *)
