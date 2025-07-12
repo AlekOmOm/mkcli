@@ -18,7 +18,7 @@ deliverables
 ---
 
 ```
-step 1  write mkcli skeleton
+✅ step 1  write mkcli skeleton
         • parse $0 to detect “alias” vs “mkcli”
         • when called as alias: exec_make()
         • when called as mkcli: subcmd router (init only for now)
