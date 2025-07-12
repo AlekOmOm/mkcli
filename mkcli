@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+VERSION="0.1.0"
+REG_USER="${MKCLI_REGISTRY:-$HOME/.config/mkcli/registry}"
+LINK_DIR="${MKCLI_LINK_DIR:-/usr/local/bin}"
+mkdir -p "$(dirname "$REG_USER")"
+lookup_dir() {
+    grep -E "^$1 " "$REG_USER" 2>/dev/null | cut -d' ' -f2 || true
+}
+alias_dispatch() {
+    alias_name="$(basename "$0")"
+    dir="$(lookup_dir "$alias_name")"
+    if [ -z "$dir" ]; then
+        echo "unknown alias $alias_name"
+        exit 1
+    fi
+    case "${1-}" in
+    "" | "help" | "--help")
+        make -C "$dir" -qn | awk -F':' '/^[a-zA-Z0-9._-]+:/ {print $1}' | sort -u
+        exit 0
+        ;;
+    esac
+    exec make -C "$dir" "$@"
+}
+cmd_init() {
+    [ $# -eq 2 ] || {
+        echo "usage: mkcli init <alias> <path>"
+        exit 1
+    }
+    alias_name="$1"
+    abs_path="$(realpath "$2")"
+    [ -f "$abs_path/Makefile" ] || {
+        echo "Makefile not found in $abs_path"
+        exit 1
+    }
+    tmp="$(mktemp)"
+    grep -v -E "^$alias_name " "$REG_USER" 2>/dev/null >"$tmp" || true
+    echo "$alias_name $abs_path $VERSION" >>"$tmp"
+    mv "$tmp" "$REG_USER"
+    sudo ln -sf "$(realpath "$0")" "$LINK_DIR/$alias_name"
+    echo "$alias_name registered $abs_path"
+}
+cmd_list() {
+    [ -f "$REG_USER" ] && cat "$REG_USER"
+}
+main() {
+    if [ "$(basename "$0")" != "mkcli" ]; then
+        alias_dispatch "$@"
+        exit 0
+    fi
+    case "${1-}" in
+    init)
+        shift
+        cmd_init "$@"
+        ;;
+    list) cmd_list ;;
+    "") echo "usage: mkcli <command>" ;;
+    *)
+        echo "unknown command $1"
+        exit 1
+        ;;
+    esac
+}
+main "$@"
