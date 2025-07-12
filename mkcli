@@ -15,24 +15,35 @@ SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
 . "$SCRIPT_DIR/lib/registry.sh"
 . "$SCRIPT_DIR/lib/link.sh"
 . "$SCRIPT_DIR/lib/parse.sh"
+
 lookup_dir() {
     registry_lookup "$1"
 }
+
 alias_dispatch() {
     alias_name="$(basename "$0")"
     dir="$(lookup_dir "$alias_name")"
     if [ -z "$dir" ]; then
-        echo "unknown alias $alias_name"
+        echo "unknown alias $alias_name" >&2
         exit 1
     fi
     case "${1-}" in
-    "" | "help" | "--help" | "--list-targets")
+    "" | help | --help)
+        if grep -q -E '^help:' "$dir/Makefile"; then
+            exec make -C "$dir" help
+        else
+            parse_list_targets "$dir"
+        fi
+        exit 0
+        ;;
+    --list-targets)
         parse_list_targets "$dir"
         exit 0
         ;;
     esac
     exec make -C "$dir" "$@"
 }
+
 cmd_init() {
     [ $# -eq 2 ] || {
         echo "usage: mkcli init <alias> <path>"
@@ -54,9 +65,11 @@ cmd_init() {
     link_create "$alias_name" "$(realpath "$0")"
     echo "$alias_name registered $abs_path"
 }
+
 cmd_list() {
     registry_list | awk '{printf "%-10s %-40s %s\n", $1, $2, $3}'
 }
+
 cmd_remove() {
     [ $# -eq 1 ] || {
         echo "usage: mkcli remove <alias>"
@@ -64,8 +77,8 @@ cmd_remove() {
     }
     alias_name="$1"
     if ! registry_lookup "$alias_name" >/dev/null; then
-        echo "alias not found"
-        exit 0
+        echo "alias not found" >&2
+        exit 1
     fi
     dst="$LINK_DIR/$alias_name"
     if [ -e "$dst" ]; then
@@ -80,20 +93,24 @@ cmd_remove() {
             exit 1
         fi
     fi
-    printf 'Remove %s? [y/N]: ' "$alias_name"
+    printf 'Remove alias %s? [y/N]: ' "$alias_name"
     read -r reply
     [ "$reply" = "y" ] || exit 1
     link_remove "$alias_name" "$(realpath "$0")"
     registry_delete "$alias_name"
-    echo "$alias_name removed"
+    echo "Alias '$alias_name' removed."
 }
+
 show_help() {
     printf '%s\n' "mkcli $VERSION" "commands:" "  init <alias> <path>" "  list" "  remove <alias>" "options:" "  --help" "aliases:" "  <alias> --help (list targets)" "  <alias> <target> [args]"
 }
+
 main() {
-    if [ "$(basename "$0")" != "mkcli" ]; then
+    alias_name="$(basename "$0")"
+    dir=$(lookup_dir "$alias_name")
+    if [ -n "$dir" ]; then
         alias_dispatch "$@"
-        exit 0
+        exit $?
     fi
     case "${1-}" in
     init)

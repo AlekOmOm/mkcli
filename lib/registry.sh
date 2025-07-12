@@ -1,28 +1,31 @@
 registry_lookup() {
-    registry_effective | awk -v alias="$1" '$1==alias {print $2; exit}'
+    local user_reg="${REG_USER}"
+    [ -f "$user_reg" ] || user_reg=/dev/null
+    awk -v alias="$1" '!seen[$1]++ && $1==alias {print $2; exit}' "$user_reg"
 }
 registry_write() {
-    alias_name="$1"
-    abs_path="$2"
-    version="$3"
+    local alias_name="$1"
+    local abs_path="$2"
+    local version="$3"
+    local tmp
     tmp="$(mktemp)"
-    grep -v -E "^$alias_name " "${REG_USER}" 2>/dev/null >"${tmp}" || true
+    if [ -f "${REG_USER}" ]; then
+        grep -v -E "^$alias_name " "${REG_USER}" >"${tmp}"
+    fi
     echo "$alias_name $abs_path $version" >>"${tmp}"
     mv "${tmp}" "${REG_USER}"
 }
 registry_list() {
-    registry_effective
-}
-REG_TEAM="${REG_TEAM:-$SCRIPT_DIR/registry.team}"
-registry_effective() {
-    {
-        [ -f "${REG_USER}" ] && cat "${REG_USER}"
-        [ -f "${REG_TEAM}" ] && cat "${REG_TEAM}"
-    } | awk '!seen[$1]++'
+    local user_reg="${REG_USER}"
+    [ -f "$user_reg" ] || user_reg=/dev/null
+    awk '!seen[$1]++' "$user_reg"
 }
 registry_delete() {
-    alias_name="$1"
-    tmp="$(mktemp)"
-    grep -v -E "^$alias_name " "${REG_USER}" 2>/dev/null >"${tmp}" || true
-    mv "${tmp}" "${REG_USER}"
+    local alias_name="$1"
+    if [ -f "${REG_USER}" ]; then
+        local tmp
+        tmp="$(mktemp)"
+        grep -v -E "^$alias_name " "${REG_USER}" >"${tmp}"
+        mv "${tmp}" "${REG_USER}"
+    fi
 }

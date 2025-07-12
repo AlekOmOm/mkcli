@@ -1,4 +1,5 @@
 link_create() {
+    echo "[debug] link_create: alias='$1' src='$2'" >&2
     alias_name="$1"
     src="$2"
     dst_dir="${LINK_DIR:-/usr/local/bin}"
@@ -18,10 +19,12 @@ link_create() {
             exit 1
         fi
     fi
+    echo "[debug] link_create: creating link '$dst' -> '$src'" >&2
     sudo ln -sf "$src" "$dst"
 }
 
 link_remove() {
+    echo "[debug] link_remove: alias='$1' src='$2'" >&2
     alias_name="$1"
     src="$2"
     dst_dir="${LINK_DIR:-/usr/local/bin}"
@@ -33,6 +36,7 @@ link_remove() {
                 echo "$dst points elsewhere" >&2
                 exit 1
             fi
+            echo "[debug] link_remove: removing link '$dst'" >&2
             sudo rm "$dst"
         else
             echo "$dst is not a symlink" >&2
