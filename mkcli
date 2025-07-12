@@ -15,8 +15,9 @@ alias_dispatch() {
         exit 1
     fi
     case "${1-}" in
-    "" | "help" | "--help")
-        make -C "$dir" -qn | awk -F':' '/^[a-zA-Z0-9._-]+:/ {print $1}' | sort -u
+    "" | "--help")
+        make -C "$dir" -pRrq -f "$dir/Makefile" : 2>/dev/null |
+            awk -F':' '/^[a-zA-Z0-9][^$#\/\t=]*:/ {print $1}' | sort -u
         exit 0
         ;;
     esac
