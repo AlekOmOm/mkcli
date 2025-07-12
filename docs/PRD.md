@@ -114,7 +114,7 @@ remove() {                          # mkcli remove
 
 ---
 
-* (in monorepo) ´mkcli´ lives in `devops/universal-makefile-cli/`.
+* (in monorepo) ´mkcli´ lives in `devops/mkcli/`.
 * file `VERSION` bumped on breaking/feature change.
 * monorepo tag format: `cli-vX.Y.Z`.
 * registry stores installed version; `doctor` warns if repo version > installed.

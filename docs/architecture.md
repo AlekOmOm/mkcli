@@ -10,6 +10,10 @@
       │   ├─ link.sh          ← symlink + sudo guard
       │   ├─ parse.sh         ← makefile target scraper
       │   └─ ui.sh            ← prompts, colors, logging
+      ├─ scripts/
+      │   ├─ install.sh       ← install mkcli
+      │   ├─ uninstall.sh     ← uninstall mkcli
+      │   └─ setup.sh         ← setup mkcli (one-time setup script)
       ├─ completions/
       │   ├─ mkcli.bash       ← generator template
       │   └─ mkcli.zsh
