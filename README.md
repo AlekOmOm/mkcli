@@ -2,6 +2,12 @@
 
 **Purpose**: One wrapper for many Makefiles—run targets from any directory without `cd`, with zero maintenance as Makefiles evolve. Portable for Bash on macOS and Linux.
 
+```bash
+# setup mkcli in /usr/local/bin/mkcli
+chmod +x ./scripts/setup.sh
+./scripts/setup.sh
+```
+
 ## TL;DR: Quick Start
 
 1. **Install**: Clone this repo and add `mkcli` to your `$PATH` (e.g., symlink or copy to `~/bin`).
