@@ -44,6 +44,9 @@ cmd_init() {
 cmd_list() {
     [ -f "$REG_USER" ] && cat "$REG_USER"
 }
+show_help() {
+    printf '%s\n' "mkcli $VERSION" "commands:" "  init <alias> <path>" "  list" "options:" "  --help" "aliases:" "  <alias> --help (list targets)" "  <alias> <target> [args]"
+}
 main() {
     if [ "$(basename "$0")" != "mkcli" ]; then
         alias_dispatch "$@"
@@ -55,7 +58,8 @@ main() {
         cmd_init "$@"
         ;;
     list) cmd_list ;;
-    "") echo "usage: mkcli <command>" ;;
+    -h | --help | help) show_help ;;
+    "") show_help ;;
     *)
         echo "unknown command $1"
         exit 1
