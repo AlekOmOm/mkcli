@@ -38,7 +38,7 @@ cmd_init() {
     grep -v -E "^$alias_name " "$REG_USER" 2>/dev/null >"$tmp" || true
     echo "$alias_name $abs_path $VERSION" >>"$tmp"
     mv "$tmp" "$REG_USER"
-    echo "> adding to \\$PATH"
+    echo "> adding to PATH"
     sudo ln -sf "$(realpath "$0")" "$LINK_DIR/$alias_name"
     echo "$alias_name registered $abs_path"
 }
