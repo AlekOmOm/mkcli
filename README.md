@@ -1,6 +1,15 @@
 # mkcli: Universal Makefile CLI Wrapper
 
-**Purpose**: One wrapper for many Makefiles—run targets from any directory without `cd`, with zero maintenance as Makefiles evolve. Portable for Bash on macOS and Linux.
+**Purpose**: 
+- `mkcli` -> -> *make any Makefile a global CLI*
+
+   -  current-dir agnostic      
+   -  auto-exposes make targets 
+   -  posix-shell portable      
+   -  auto-exposes make targets 
+   -  posix-shell portable      
+
+## quick start
 
 ```bash
 # setup mkcli in /usr/local/bin/mkcli
@@ -8,10 +17,15 @@ chmod +x ./scripts/setup.sh
 ./scripts/setup.sh
 ```
 
-## TL;DR: Quick Start
+```bash
+# register an alias
+mkcli add <alias> <path-to-dir-with-Makefile>
+```
+
+## TL;DR:
 
 1. **Install**: Clone this repo and add `mkcli` to your `$PATH` (e.g., symlink or copy to `~/bin`).
-2. **Register an Alias**: `mkcli init <alias> <path-to-dir-with-Makefile>`  
+2. **Register an Alias**: `mkcli add <alias> <path-to-dir-with-Makefile>`  
    - Creates a global symlink in `/usr/local/bin/<alias>` (requires sudo for that step only).  
    - Registers the path in `~/.config/mkcli/registry`.
 3. **Run Targets**: `<alias> <target> [args]` (e.g., `myproj build`)—proxies to `make -C <dir>`.  

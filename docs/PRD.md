@@ -58,11 +58,11 @@ resolution order: team → user (user can override).
 
 | cmd                        | intention                                                                |
 | -------------------------- | ------------------------------------------------------------------------ |
-| `CLI init <alias> <path>`  | register dir (abs or `.`) and create symlink in `/usr/local/bin/<alias>` |
-| `CLI list`                 | print merged registry (team/user)                                        |
-| `CLI remove <alias>`       | delete symlink + registry entry (with safety checks)                     |
-| `CLI doctor`               | audit: broken links, path collisions, version drift                      |
-| `CLI upgrade-all`          | `git pull` monorepo → recreate symlinks where wrapper `VERSION` changed  |
+| `mkcli add <alias> <path>` | register dir (abs or `.`) and create symlink in `/usr/local/bin/<alias>` |
+| `mkcli list`               | print merged registry (team/user)                                        |
+| `mkcli remove <alias>`     | delete symlink + registry entry (with safety checks)                     |
+| `mkcli doctor`             | audit: broken links, path collisions, version drift                      |
+| `mkcli upgrade-all`        | `git pull` monorepo → recreate symlinks where wrapper `VERSION` changed  |
 | `<alias> [target [args…]]` | proxy to `make -C <dir> "$@"`                                            |
 | `<alias> --help / ""`      | dynamic usage scraped from makefile                                      |
 | `<alias> --list-targets`   | machine-readable target list for completion                              |
@@ -76,7 +76,7 @@ flags: `--yes` (non-interactive), `--version`, `--registry <path>` override.
 ---
 
 ```bash
-register() {                         # mkcli init
+register() {                         # mkcli add
   alias="$1"; dir="$(realpath "$2")"
   [ -f "$dir/Makefile" ] || abort "no Makefile"
   confirm_symlink_write "$alias"    # ask unless --yes
@@ -164,5 +164,5 @@ non-interactive automation sets `MKCLI_YES=1` or `--yes`.
 
 * ≤ 1 min onboarding for new alias.
 * 0 manual edits to wrapper after 3 months usage.
-* ≥ 90 % of team aliases installed via `CLI init` in first sprint.
+* ≥ 90 % of team aliases installed via `mkcli add` in first sprint.
 

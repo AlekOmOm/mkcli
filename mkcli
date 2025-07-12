@@ -44,9 +44,9 @@ alias_dispatch() {
     exec make -C "$dir" "$@"
 }
 
-cmd_init() {
+cmd_add() {
     [ $# -eq 2 ] || {
-        echo "usage: mkcli init <alias> <path>"
+        echo "usage: mkcli add <alias> <path>"
         exit 1
     }
     alias_name="$1"
@@ -102,7 +102,7 @@ cmd_remove() {
 }
 
 show_help() {
-    printf '%s\n' "mkcli $VERSION" "commands:" "  init <alias> <path>" "  list" "  remove <alias>" "options:" "  --help" "aliases:" "  <alias> --help (list targets)" "  <alias> <target> [args]"
+    printf '%s\n' "mkcli $VERSION" "commands:" "  add <alias> <path>" "  list" "  remove <alias>" "options:" "  --help" "aliases:" "  <alias> --help (list targets)" "  <alias> <target> [args]"
 }
 
 main() {
@@ -113,9 +113,9 @@ main() {
         exit $?
     fi
     case "${1-}" in
-    init)
+    add)
         shift
-        cmd_init "$@"
+        cmd_add "$@"
         ;;
     list) cmd_list ;;
     remove)
