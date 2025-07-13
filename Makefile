@@ -9,7 +9,11 @@
 .PHONY: install uninstall help
 
 install: ## install mkcli 
-	chmod +x ./scripts/setup.sh
+	@set -e; \
+	if [ ! -f ./scripts/setup.sh ]; then \
+	  echo "setup.sh missing" >&2; exit 1; \
+	fi; \
+	chmod +x ./scripts/setup.sh; \
 	./scripts/setup.sh
 
 uninstall: ## uninstall mkcli

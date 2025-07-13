@@ -163,19 +163,16 @@ cmd_remove() {
 cmd_mode_help() {
     # overwrite log level
     local original_log_level="${MKCLI_LOG_LEVEL-minimal}"
+    trap "export MKCLI_LOG_LEVEL=$original_log_level" RETURN
     export MKCLI_LOG_LEVEL=info
 
     # mode help info
     info "usage: mkcli mode <minimal|info|debug>"
     info "crnt mode: $original_log_level"
-
-    # restore log level
-    export MKCLI_LOG_LEVEL="$original_log_level"
-    exit 0
 }
 
 cmd_mode() {
-    [ $# -eq 1 ] || cmd_mode_help
+    [ $# -eq 1 ] || { cmd_mode_help; exit 0; }
 
     # set log level
     local level="$1"
