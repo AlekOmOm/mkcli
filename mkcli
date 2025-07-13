@@ -10,8 +10,12 @@ mkdir -p "$(dirname "$CONFIG_FILE")"
 touch "$CONFIG_FILE"
 
 # Set default log level if not set in config
-if ! grep -q "MKCLI_LOG_LEVEL" "$CONFIG_FILE"; then
-    echo "MKCLI_LOG_LEVEL=minimal" >>"$CONFIG_FILE"
+if [ -s "$CONFIG_FILE" ]; then
+    if ! grep -q "^MKCLI_LOG_LEVEL=" "$CONFIG_FILE"; then
+        echo "MKCLI_LOG_LEVEL=minimal" >> "$CONFIG_FILE"
+    fi
+else
+    echo "MKCLI_LOG_LEVEL=minimal" > "$CONFIG_FILE"
 fi
 
 # Load config
@@ -168,7 +172,7 @@ cmd_mode() {
     local level="$1"
     case "$level" in
     minimal | info | debug)
-        sed -i '' "s/MKCLI_LOG_LEVEL=.*/MKCLI_LOG_LEVEL=$level/" "$CONFIG_FILE"
+        sed "s/MKCLI_LOG_LEVEL=.*/MKCLI_LOG_LEVEL=$level/" "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
 
         # success
         ok "log level set to $level"

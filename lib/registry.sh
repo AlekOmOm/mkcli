@@ -1,3 +1,15 @@
+#!/bin/bash
+
+# registry.sh
+#
+# This script is used to manage the registry of aliases.
+#
+# Usage:
+#   registry.sh <alias> <path> <version>
+#
+
+source lib/ui.sh
+
 # check if alias is registered
 registry_lookup() {
     local user_reg="${REG_USER}"

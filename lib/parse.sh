@@ -1,3 +1,13 @@
+#!/bin/bash
+
+# parse.sh
+#
+# This script is used to parse the Makefile of a project and extract the list of targets.
+#
+# Usage:
+#   parse.sh <dir>
+#
+
 source lib/ui.sh
 
 parse_list_targets() {

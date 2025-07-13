@@ -1,3 +1,13 @@
+#!/bin/bash
+
+# link.sh
+#
+# This script is used to create and remove links to the source code.
+#
+# Usage:
+#   link.sh <alias> <src>
+#
+
 source lib/ui.sh
 
 link_create() {
@@ -34,14 +44,14 @@ link_remove() {
         if [ -L "$dst" ]; then
             target="$(readlink "$dst")"
             if [ "$target" != "$src" ]; then
-                echo "$dst points elsewhere" >&2
-                exit 1
+                info "WARN: $dst points elsewhere"
+                return 1
             fi
             debug "link_remove: removing link '$dst'"
             sudo rm "$dst"
         else
-            echo "$dst is not a symlink" >&2
-            exit 1
+            info "WARN: $dst is not a symlink"
+            return 1
         fi
     fi
 }
