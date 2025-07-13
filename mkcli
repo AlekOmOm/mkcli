@@ -92,6 +92,8 @@ cmd_add() {
 }
 
 cmd_list() {
+    info "listing aliases"
+    info "structure:   <alias>   <path>   <version*>    - note: version = version of mkcli at time of alias registration"
     registry_list | table
 }
 
@@ -120,8 +122,17 @@ cmd_remove() {
     ok "Alias '$alias_name' removed."
 }
 
+cmd_mode_help() {
+    local original_log_level="${MKCLI_LOG_LEVEL-minimal}"
+    export MKCLI_LOG_LEVEL=info
+    info "usage: mkcli mode <minimal|info|debug>"
+    info "crnt mode: $original_log_level"
+    export MKCLI_LOG_LEVEL="$original_log_level"
+    exit 0
+}
+
 cmd_mode() {
-    [ $# -eq 1 ] || fail "usage: mkcli mode <minimal|info|debug>"
+    [ $# -eq 1 ] || cmd_mode_help
     local level="$1"
     case "$level" in
     minimal | info | debug)
@@ -160,6 +171,8 @@ show_help() {
         printf "  <alias> --help\tlist targets for an alias\n"
         printf "  <alias> <target> [args]\texecute a make target\n"
     } | table
+
+    export MKCLI_LOG_LEVEL="$original_log_level"
 }
 
 main() {
