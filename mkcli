@@ -18,6 +18,15 @@ else
     echo "MKCLI_LOG_LEVEL=minimal" > "$CONFIG_FILE"
 fi
 
+# Ensure config file is readable and not world-writable
+chmod 600 "$CONFIG_FILE"
+
+# Validate config: only allow simple KEY=VALUE assignments
+if grep -q -v -E '^([[:alpha:]_][[:alnum:]_]*=[^;&|$()<>`]+)?$' "$CONFIG_FILE"; then
+  echo "Error: invalid entries in config file (only KEY=VALUE allowed)" >&2
+  exit 1
+fi
+
 # Load config
 . "$CONFIG_FILE"
 
