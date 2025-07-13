@@ -89,7 +89,9 @@ fail() {
 }
 
 debug() {
-    _log "debug" "🐛" "${_COLOR_DEBUG-}" "$@"
+    if [ "$MKCLI_LOG_LEVEL" = "debug" ]; then
+        _log "debug" "🐛" "${_COLOR_DEBUG-}" "$@"
+    fi
 }
 
 confirm() {

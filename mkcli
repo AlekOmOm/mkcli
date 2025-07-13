@@ -34,7 +34,7 @@ lookup_dir() {
     registry_lookup "$1"
 }
 
-run_make() {
+exec_make() {
     dir="$1"
     shift
     debug "running 'make $*' in '$dir'"
@@ -52,6 +52,8 @@ alias_dispatch() {
     if [ -z "$dir" ]; then
         fail "unknown alias $alias_name"
     fi
+
+    # dispatch command
     case "${1-}" in
     "" | help | --help)
         title "$alias_name - targets"
@@ -59,7 +61,7 @@ alias_dispatch() {
         echo
         info "available targets"
         if grep -q -E '^help:' "$dir/Makefile"; then
-            run_make "$dir" help
+            exec_make "$dir" help
         else
             parse_list_targets "$dir" | table
         fi
@@ -70,30 +72,43 @@ alias_dispatch() {
         exit 0
         ;;
     esac
-    run_make "$dir" "$@"
+
+    # execute cmd 
+    exec_make "$dir" "$@"
 }
 
 cmd_add() {
     [ $# -eq 2 ] || {
         fail "usage: mkcli add <alias> <path>"
     }
+
+    # parse arguments
     local alias_name="$1"
     local abs_path="$(realpath "$2")"
     [ -f "$abs_path/Makefile" ] || {
         fail "Makefile not found in $abs_path"
     }
-    if registry_lookup "$alias_name" >/dev/null; then
+
+    # check if alias already exists
+    if [ -n "$(registry_lookup "$alias_name")" ]; then
         confirm "Alias '$alias_name' already exists, override?" || exit 1
     fi
-    registry_write "$alias_name" "$abs_path" "$VERSION"
+
+    # add to PATH
     info "adding to PATH"
     link_create "$alias_name" "$(realpath "$0")"
+    registry_write "$alias_name" "$abs_path" "$VERSION"
+
+    # success
     ok "$alias_name registered $abs_path"
 }
 
 cmd_list() {
+    # info
     info "listing aliases"
     info "structure:   <alias>   <path>   <version*>    - note: version = version of mkcli at time of alias registration"
+    
+    # list aliases
     registry_list | table
 }
 
@@ -102,9 +117,13 @@ cmd_remove() {
         fail "usage: mkcli remove <alias>"
     }
     local alias_name="$1"
-    if ! registry_lookup "$alias_name" >/dev/null; then
+
+    # check if alias exists
+    if [ -z "$(registry_lookup "$alias_name")" ]; then
         fail "alias not found"
     fi
+
+    # check if alias is a symlink
     local dst="$LINK_DIR/$alias_name"
     if [ -e "$dst" ]; then
         if [ -L "$dst" ]; then
@@ -116,30 +135,46 @@ cmd_remove() {
             fail "$dst is not a symlink"
         fi
     fi
+
+    # remove from PATH
     confirm "Remove alias '$alias_name'?" || exit 1
     link_remove "$alias_name" "$(realpath "$0")"
+
+    # remove from registry
     registry_delete "$alias_name"
+
+    # success
     ok "Alias '$alias_name' removed."
 }
 
 cmd_mode_help() {
+    # overwrite log level
     local original_log_level="${MKCLI_LOG_LEVEL-minimal}"
     export MKCLI_LOG_LEVEL=info
+
+    # mode help info
     info "usage: mkcli mode <minimal|info|debug>"
     info "crnt mode: $original_log_level"
+
+    # restore log level
     export MKCLI_LOG_LEVEL="$original_log_level"
     exit 0
 }
 
 cmd_mode() {
     [ $# -eq 1 ] || cmd_mode_help
+
+    # set log level
     local level="$1"
     case "$level" in
     minimal | info | debug)
         sed -i '' "s/MKCLI_LOG_LEVEL=.*/MKCLI_LOG_LEVEL=$level/" "$CONFIG_FILE"
+
+        # success
         ok "log level set to $level"
         ;;
     *)
+        # failure
         fail "invalid log level: $level"
         ;;
     esac
@@ -155,15 +190,15 @@ show_help() {
     echo
     info "commands:"
     {
-        printf "  add <alias> <path>\tadd a new Makefile project\n"
-        printf "  list\tlist all registered aliases\n"
-        printf "  remove <alias>\tremove an alias\n"
-        printf "  mode <level>\tset log level (minimal, info, debug)\n"
+        printf "  add: \t\t a <alias> <path>\tadd a new Makefile project\n"
+        printf "  list: \t\t ls \tlist all registered aliases\n"
+        printf "  remove: \t\t rm <alias>\tremove an alias\n"
+        printf "  mode: \t\t m <level>\tset log level (minimal, info, debug)\n"
     } | table
     echo
     info "options:"
     {
-        printf "  --help\tshow this help message\n"
+        printf "  --help: \t\t\t\t show this help message\n"
     } | table
     echo
     info "aliases:"
@@ -182,17 +217,25 @@ main() {
         alias_dispatch "$@"
         exit $?
     fi
+
+    # dispatch command
     case "${1-}" in
-    add)
+
+    # add alias
+    add | a)
         shift
         cmd_add "$@"
         ;;
-    list) cmd_list ;;
-    remove)
+    
+    # list aliases
+    list | ls) cmd_list ;;
+
+    # remove alias
+    remove | rm)
         shift
         cmd_remove "$@"
         ;;
-    mode)
+    mode | m)
         shift
         cmd_mode "$@"
         ;;

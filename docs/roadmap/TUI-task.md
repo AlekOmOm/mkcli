@@ -6,7 +6,7 @@ main
   │    ├─ echo/printf status lines
   ├─ alias_dispatch
   │    ├─ parse_list_targets → prints a tab-separated “help” table
-  │    └─ run_make → exec make …
+  │    └─ exec_make → exec make …
   └─ global flags: set -euo pipefail
 
 no spinner yet, no colour logic, no width-aware table, no tests that assert UI output.
@@ -17,7 +17,7 @@ where the four “gaps” could bite mkcli
 
 gap	where it surfaces in mkcli	why it matters (or not)
 term-cap detection & cache	every info/ok/warn/fail/title call we introduce	set -u means uninitialised vars abort the script. make sure ui.sh pre-declares _COLOR_SUPPORT='' before it is first referenced (fixed in the skeleton). also guard tput calls because TERM=dumb is common in CI.
-spinner signals	today: unused. future: tempting to wrap run_make.	problem: run_make currently execs into make. wrapping it in spinner would remove that exec, spawning an extra shell layer, and we must forward the exit code + INT/TERM ⇒ needs careful refactor (or skip spinner).
+spinner signals	today: unused. future: tempting to wrap exec_make.	problem: exec_make currently execs into make. wrapping it in spinner would remove that exec, spawning an extra shell layer, and we must forward the exit code + INT/TERM ⇒ needs careful refactor (or skip spinner).
 width-aware table	parse_list_targets prints target + doc string (help screen).	if we switch to table helper we inherit its multibyte risk. most target names are ASCII, so mis-alignment shows only when someone writes an emoji in a Makefile comment. acceptable, but note it in docs.
 test hooks	bats / shunit tests you may add later.	not a runtime bug, but you’ll thank yourself for NO_COLOR=1 + GLYPH_FALLBACK=ascii so golden‐files in tests stay stable.
 
