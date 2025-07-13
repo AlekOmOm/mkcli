@@ -8,7 +8,8 @@
 #   parse.sh <dir>
 #
 
-source lib/ui.sh
+LIB_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+source "$LIB_DIR/ui.sh"
 
 parse_list_targets() {
     debug "parse_list_targets: dir='$1'"

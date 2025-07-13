@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-VERSION="$(cat ./VERSION)"
 CONFIG_FILE="${MKCLI_CONFIG:-$HOME/.config/mkcli/config}"
 REG_USER="${MKCLI_REGISTRY:-$HOME/.config/mkcli/registry}"
 LINK_DIR="${MKCLI_LINK_DIR:-/usr/local/bin}"
@@ -38,6 +37,7 @@ while [ -L "$SOURCE" ]; do
     [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+VERSION="$(cat "$SCRIPT_DIR/VERSION")"
 . "$SCRIPT_DIR/lib/ui.sh"
 . "$SCRIPT_DIR/lib/registry.sh"
 . "$SCRIPT_DIR/lib/link.sh"

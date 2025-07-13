@@ -8,7 +8,8 @@
 #   link.sh <alias> <src>
 #
 
-source lib/ui.sh
+LIB_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+source "$LIB_DIR/ui.sh"
 
 link_create() {
     debug "link_create: alias='$1' src='$2'"

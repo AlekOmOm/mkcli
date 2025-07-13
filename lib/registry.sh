@@ -8,7 +8,8 @@
 #   registry.sh <alias> <path> <version>
 #
 
-source lib/ui.sh
+LIB_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+source "$LIB_DIR/ui.sh"
 
 # check if alias is registered
 registry_lookup() {
