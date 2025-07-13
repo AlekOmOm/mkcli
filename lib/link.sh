@@ -23,11 +23,12 @@ link_create() {
             local target
             target="$(readlink "$dst")"
             if [ "$target" != "$src" ]; then
-                info "WARN: $dst already points elsewhere"
+                warn "$dst already points elsewhere"
                 return 1
             fi
+            confirm "Override existing link?" || return 1
         else
-            info "WARN: $dst exists and is not a symlink"
+            warn "$dst exists and is not a symlink"
             return 1
         fi
     fi
@@ -45,13 +46,13 @@ link_remove() {
         if [ -L "$dst" ]; then
             target="$(readlink "$dst")"
             if [ "$target" != "$src" ]; then
-                info "WARN: $dst points elsewhere"
+                warn "$dst points elsewhere"
                 return 1
             fi
             debug "link_remove: removing link '$dst'"
             sudo rm "$dst"
         else
-            info "WARN: $dst is not a symlink"
+            warn "$dst is not a symlink"
             return 1
         fi
     fi

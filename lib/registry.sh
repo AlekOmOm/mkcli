@@ -32,10 +32,9 @@ registry_write() {
 }
 
 registry_list() {
-    local user_reg="${REG_USER}"
-    if [ -f "$user_reg" ]; then
-        cat "$user_reg"
-    fi
+    local user_reg="$REG_USER"
+    [ -f "$user_reg" ] || user_reg=/dev/null
+    awk '!seen[$1]++' "$user_reg"
 }
 
 registry_delete() {
