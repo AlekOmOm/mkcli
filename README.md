@@ -6,8 +6,6 @@
    -  current-dir agnostic      
    -  auto-exposes make targets 
    -  posix-shell portable      
-   -  auto-exposes make targets 
-   -  posix-shell portable      
 
 ## quick start
 
