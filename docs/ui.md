@@ -18,6 +18,7 @@ functional units (log, prompt, list, table) → reusable across all sub-scripts
 | success  | `setaf 2`   | green    | ✔     |
 | warn     | `setaf 3`   | yellow   | !     |
 | error    | `setaf 1`   | red      | ✖     |
+| debug    | `setaf 5`   | magenta  | 🐛    |
 | accent   | `bold`      | —        | n/a   |
 
 `reset=$(tput sgr0)` after every colored segment.
@@ -100,6 +101,20 @@ fail() {
 
 	•	one exit point per script block; upstream propagates status code.
 	•	no stack traces; messages concise + actionable.
+
+⸻
+
+	7.	logging verbosity
+
+⸻
+
+to control output verbosity, mkcli supports three modes, configurable via the `mkcli mode <level>` command. the setting is persisted in `~/.config/mkcli/config`.
+
+	•	`minimal`: only shows essential output (`ok`, `warn`, `fail`, `title`, and confirmation prompts). silences `info` and `debug` messages.
+	•	`info` (default): shows all messages except `debug`. this is the standard operating mode.
+	•	`debug`: shows all messages, including verbose `debug` logs for troubleshooting.
+
+the implementation resides in `lib/ui.sh`, where functions like `info()` and `debug()` check a `MKCLI_LOG_LEVEL` environment variable before printing.
 
 ⸻
 
