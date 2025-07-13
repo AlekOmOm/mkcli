@@ -20,6 +20,16 @@ lookup_dir() {
     registry_lookup "$1"
 }
 
+run_make() {
+    dir="$1"
+    shift
+    if [ "${MKCLI_DIRENV-}" != "0" ] && [ -f "$dir/.envrc" ] && command -v direnv >/dev/null; then
+        exec direnv exec "$dir" make -C "$dir" "$@"
+    else
+        exec make -C "$dir" "$@"
+    fi
+}
+
 alias_dispatch() {
     alias_name="$(basename "$0")"
     dir="$(lookup_dir "$alias_name")"
@@ -30,7 +40,7 @@ alias_dispatch() {
     case "${1-}" in
     "" | help | --help)
         if grep -q -E '^help:' "$dir/Makefile"; then
-            exec make -C "$dir" help
+            run_make "$dir" help
         else
             parse_list_targets "$dir"
         fi
@@ -41,7 +51,7 @@ alias_dispatch() {
         exit 0
         ;;
     esac
-    exec make -C "$dir" "$@"
+    run_make "$dir" "$@"
 }
 
 cmd_add() {
