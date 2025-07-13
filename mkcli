@@ -20,9 +20,19 @@ lookup_dir() {
     registry_lookup "$1"
 }
 
+run_make() {
+    dir="$1"
+    shift
+    if [ "${MKCLI_DIRENV-}" != "0" ] && [ -f "$dir/.envrc" ] && command -v direnv >/dev/null; then
+        exec direnv exec "$dir" make -C "$dir" "$@"
+    else
+        exec make -C "$dir" "$@"
+    fi
+}
+
 alias_dispatch() {
-    alias_name="$(basename "$0")"
-    dir="$(lookup_dir "$alias_name")"
+    local alias_name="$(basename "$0")"
+    local dir="$(lookup_dir "$alias_name")"
     if [ -z "$dir" ]; then
         echo "unknown alias $alias_name" >&2
         exit 1
@@ -30,7 +40,7 @@ alias_dispatch() {
     case "${1-}" in
     "" | help | --help)
         if grep -q -E '^help:' "$dir/Makefile"; then
-            exec make -C "$dir" help
+            run_make "$dir" help
         else
             parse_list_targets "$dir"
         fi
@@ -41,7 +51,7 @@ alias_dispatch() {
         exit 0
         ;;
     esac
-    exec make -C "$dir" "$@"
+    run_make "$dir" "$@"
 }
 
 cmd_add() {
@@ -49,14 +59,15 @@ cmd_add() {
         echo "usage: mkcli add <alias> <path>"
         exit 1
     }
-    alias_name="$1"
-    abs_path="$(realpath "$2")"
+    local alias_name="$1"
+    local abs_path="$(realpath "$2")"
     [ -f "$abs_path/Makefile" ] || {
         echo "Makefile not found in $abs_path"
         exit 1
     }
     if registry_lookup "$alias_name" >/dev/null; then
         printf 'Alias %s already exists, override? [y/N]: ' "$alias_name"
+        local reply
         read -r reply
         [ "$reply" = "y" ] || exit 1
     fi
@@ -75,15 +86,15 @@ cmd_remove() {
         echo "usage: mkcli remove <alias>"
         exit 1
     }
-    alias_name="$1"
+    local alias_name="$1"
     if ! registry_lookup "$alias_name" >/dev/null; then
         echo "alias not found" >&2
         exit 1
     fi
-    dst="$LINK_DIR/$alias_name"
+    local dst="$LINK_DIR/$alias_name"
     if [ -e "$dst" ]; then
         if [ -L "$dst" ]; then
-            target="$(readlink "$dst")"
+            local target="$(readlink "$dst")"
             if [ "$target" != "$(realpath "$0")" ]; then
                 echo "$dst points elsewhere" >&2
                 exit 1
@@ -94,6 +105,7 @@ cmd_remove() {
         fi
     fi
     printf 'Remove alias %s? [y/N]: ' "$alias_name"
+    local reply
     read -r reply
     [ "$reply" = "y" ] || exit 1
     link_remove "$alias_name" "$(realpath "$0")"
@@ -106,8 +118,8 @@ show_help() {
 }
 
 main() {
-    alias_name="$(basename "$0")"
-    dir=$(lookup_dir "$alias_name")
+    local alias_name="$(basename "$0")"
+    local dir=$(lookup_dir "$alias_name")
     if [ -n "$dir" ]; then
         alias_dispatch "$@"
         exit $?
