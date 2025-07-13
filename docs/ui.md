@@ -9,20 +9,18 @@ functional units (log, prompt, list, table) → reusable across all sub-scripts
 
 ⸻
 
-	1.	color palette (tput)
+### 1. Color palette (tput)
 
-⸻
+| Semantic | `tput` call | Fallback | Glyph |
+|----------|-------------|----------|-------|
+| title    | `setaf 6`   | cyan     | ◆     |
+| info     | `setaf 7`   | white    | →     |
+| success  | `setaf 2`   | green    | ✔     |
+| warn     | `setaf 3`   | yellow   | !     |
+| error    | `setaf 1`   | red      | ✖     |
+| accent   | `bold`      | —        | n/a   |
 
-
-semantic	tput call	fallback (no color)	glyph
-title	setaf 6	cyan	◆
-info	setaf 7	white	→
-success	setaf 2	green	✔
-warn	setaf 3	yellow	!
-error	setaf 1	red	✖
-accent	bold	**	n/a
-
-reset=$(tput sgr0) after every colored segment.
+`reset=$(tput sgr0)` after every colored segment.
 
 ⸻
 
