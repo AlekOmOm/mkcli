@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-VERSION="0.1.0"
+VERSION="$(cat ./VERSION)"
 CONFIG_FILE="${MKCLI_CONFIG:-$HOME/.config/mkcli/config}"
 REG_USER="${MKCLI_REGISTRY:-$HOME/.config/mkcli/registry}"
 LINK_DIR="${MKCLI_LINK_DIR:-/usr/local/bin}"
