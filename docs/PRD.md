@@ -1,4 +1,4 @@
-# mkcli – universal makefile cli wrapper – prd v0.2
+# mkcli – universal makefile cli wrapper – prd v1.0.0
 
 > purpose: one wrapper → many makefiles → zero cd gymnastics.
 
