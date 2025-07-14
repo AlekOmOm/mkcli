@@ -13,7 +13,7 @@ deliverables
 
 ---
 
-1. coding order
+1. coding order (MVP todos)
 
 ---
 
@@ -23,23 +23,23 @@ deliverables
         • when called as alias: exec_make()
         • when called as mkcli: subcmd router (init only for now)
 
-step 2  implement init flow
+✅ step 2  implement init flow
         • validate args, path, makefile
         • write ~/.config/mkcli/registry  (mkdir –p)
         • sudo ln -sf $(realpath $0) /usr/local/bin/<alias>
 
-step 3  dispatch flow
+✅ step 3  dispatch flow
         • load registry → resolve dir
         • if argv[1] in { "", help, --help } → scrape + print targets
         • else exec: make -C dir "$@"
 
-step 4  write setup.sh
+✅ step 4  write setup.sh
         • cd to repo root
         • chmod +x devops/mkcli/mkcli
         • sudo ln -sf $(pwd)/devops/mkcli/mkcli /usr/local/bin/mkcli
         • echo "[✔] mkcli installed. run: mkcli init devvm <path>"
 
-step 5  smoke-test
+✅ step 5  smoke-test
         • mkcli init devvm /abs/.../terraform-dev-server
         • devvm help
         • devvm plan
